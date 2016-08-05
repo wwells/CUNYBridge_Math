@@ -1,0 +1,339 @@
+---
+title: "HW2_DataSciMath"
+output: html_document
+---
+#### Walt Wells - 07.16-07.24.2016
+
+1. 	There are 540 identical plastic chips numbered 1 through 540 in a box.  What is the probability of reaching into the box and randomly drawing the chip numbered 505?  Express your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+round(1/540, 4)
+```
+ 
+2. 	Write out the sample space for the given experiment.  Separate your answers using commas.
+
+When deciding what you want to put into a salad for dinner at a restaurant, you will choose one of the following extra toppings: asparagus, cheese.  Also, you will add one of following meats: eggs, turkey.  Lastly, you will decide on one of the following dressings: French, vinaigrette.  (Note: Use the following letters to indicate each choice: A for asparagus, C for cheese, E for eggs, T for turkey, F for French, and V for vinaigrette.)
+
+```{r}
+topping <- c(rep("A", 4), rep("C", 4))
+meat <- c(rep("E", 2), rep("T", 2), rep("E", 2), rep("T", 2))
+dress <- c("F","V","F","V","F","V","F","V")
+df <- data.frame(topping, meat, dress)
+df
+```
+
+3. 	A card is drawn from a standard deck of 52 playing cards.  What is the probability that the card will be a heart and not a face card?  Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+round(10/52, 4)
+```
+
+4. 	A standard pair of six-sided dice is rolled.  What is the probability of rolling a sum less than 6?  Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+round(10/36 ,4)
+```
+ 
+5. 	A pizza delivery company classifies its customers by gender and location of residence.  The research department has gathered data from a random sample of 2001 customers.  The data is summarized in the table below.
+
+What is the probability that a customer is male?  Write your answer as a fraction or a decimal number rounded to four decimal places. 
+
+``` {r}	
+## Gender and Residence of Customers
+m <- c(233, 159, 102, 220, 250)
+f <- c(208, 138, 280, 265, 146)
+class <- c("Apartment", "Dorm", "With Parent(s)", "Sorority/Fraternity House", "Other")
+df <- data.frame(class, m, f)
+names(df) <- c("Class", "Males", "Females")
+df
+round(sum(df$Males) / (sum(df$Males) + sum(df$Females)), 4)
+```
+
+6. 	Three cards are drawn with replacement from a standard deck.   What is the probability that the first card will be a club, the second card will be a black card, and the third card will be a face card?  Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+c1 <- 13/52
+c2 <- 26/52
+c3 <- 12/52
+round(c1*c2*c3, 4)
+```
+
+7. 	Two cards are drawn without replacement from a standard deck of 52 playing cards.  What is the probability of choosing a spade for the second card drawn, if the first card, drawn without replacement, was a heart?  Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+# find P(B|A)
+pA <- 13/52
+pB <- 13/51
+pAandB <- pA * pB
+round(pAandB/pA, 4)
+```
+
+8. 	Two cards are drawn without replacement from a standard deck of 52 playing cards.  What is the probability of choosing a heart and then, without replacement, a red card?  Write your answer as a fraction or a decimal number rounded to four decimal places.
+
+```{r}
+# conditional, but not B|A
+pA <- 13/52
+pB <- 25/51
+round(pA * pB, 4)
+```
+
+9. 	There are 85 students in a basic math class.  The instructor must choose two students at random.
+
+What is the probability that a junior female and then a freshmen male are chosen at random?  Write your answer as a fraction or a decimal number rounded to four decimal places. 
+
+``` {r}
+##Students in a Basic Math Class
+m <- c(12, 19, 12, 7)
+f <- c(12, 15, 4, 4)
+grade <- c("Freshmen", "Sophomores", "Juniors", "Seniors")
+df <- data.frame(grade, m, f)
+names(df) <- c("Level","Males", "Females")
+df
+p1 <- 4/85
+p2 <- 12/84
+p3 <- round(p1 * p2, 4)  
+p3 
+```
+
+10. Out of 300 applicants for a job, 141 are male and 52 are male and have a graduate degree.
+
+* Step 1. What is the probability that a randomly chosen applicant has a graduate degree, given that they are male?  Enter your answer as a fraction or a decimal rounded to four decimal places. 
+* Step 2. If 102 of the applicants have graduate degrees, what is the probability that a randomly chosen applicant is male, given that the applicant has a graduate degree?  Enter your answer as a fraction or a decimal rounded to four decimal places. 
+
+```{r}
+#Step1
+P_m <- 141/300
+P_mANDd<- 52/300
+round(P_mANDd / P_m, 4)
+#Step2
+P_d <- 102/300
+round(P_mANDd / P_d, 4)
+```
+
+11.  A value meal package at Ron's Subs consists of a drink, a sandwich, and a bag of chips.  There are 6 types of drinks to choose from, 5 types of sandwiches, and 3 types of chips.  How many different value meal packages are possible?
+
+```{r}
+6 * 5 * 3
+```
+
+12.  A doctor visits her patients during morning rounds.  In how many ways can the doctor visit 5 patients during the morning rounds?
+
+```{r}
+factorial(5)
+```
+
+13.  A coordinator will select 5 songs from a list of 8 songs to compose an event's musical entertainment lineup.  How many different lineups are possible?
+
+```{r}
+# define permutation function to be used throughout homework
+permutation = function(n, r) {
+    factorial(n) / factorial(n-r)
+}
+permutation(8, 5)
+```
+
+14.  A person rolls a standard six-sided die 9 times.  In how many ways can he get 3 fours, 5 sixes and 1 two?
+
+```{r}
+factorial(9) / (factorial(3) * factorial(5) * factorial(1))
+```
+
+15.  How many ways can Rudy choose 6 pizza toppings from a menu of 14 toppings if each topping can only be chosen once?
+
+```{r}
+# define combination function to be used throughout homework
+## NOTE:   'choose' available, but self-definition seemed more complete
+combination = function(n, r) {
+    factorial(n) / (factorial(n-r) * factorial(r))
+}
+combination(14,6)
+```
+
+16.  3 cards are drawn from a standard deck of 52 playing cards.  How many different 3-card hands are possible if the drawing is done without replacement?
+
+```{r}
+combination(52, 3)
+```
+
+17.  You are ordering a new home theater system that consists of a TV, surround sound system, and DVD player.  You can choose from 12 different TVs, 9 types of surround sound systems, and 5 types of DVD players.  How many different home theater systems can you build?
+
+```{r}
+12 * 9 * 5
+```
+
+18.  You need to have a password with 5 letters followed by 3 odd digits between 0 - 9 inclusively.  If the characters and digits cannot be used more than once, how many choices do you have for your password?
+
+```{r}
+permutation(26, 5) * permutation(10, 3)
+```
+
+19.  Evaluate the following expression.
+	 _9 P_4
+	 
+```{r}
+permutation(9, 4)
+```
+ 
+20.  Evaluate the following expression.
+	 _11 C_8
+	 
+```{r}
+combination(11, 8)
+```
+ 
+21.  Evaluate the following expression.
+	( _12 P_8)/( _12 C_4 )
+
+```{r}
+permutation(12, 8) / combination(12, 4)
+```
+ 
+22.  The newly elected president needs to decide the remaining 7 spots available in the cabinet he/she is appointing.  If there are 13 eligible candidates for these positions (where rank matters), how many different ways can the members of the cabinet be appointed?
+
+```{r}
+permutation(13, 7)
+```
+
+23.  In how many ways can the letters in the word 'Population' be arranged?
+
+```{r}
+factorial(10) / (factorial(2) * factorial(2))
+```
+
+24.  Consider the following data:
+
+* Step 1. Find the expected value E( X ).  Round your answer to one decimal place.  
+* Step 2. Find the variance.  Round your answer to one decimal place. 
+* Step 3. Find the standard deviation.  Round your answer to one decimal place. 
+* Step 4. Find the value of P(X >= 9).  Round your answer to one decimal place.  
+* Step 5. Find the value of P(X <= 7).  Round your answer to one decimal place. 
+
+```{r}
+x <- c(5, 6, 7, 8, 9) 
+px <- c(0.1, 0.2, 0.3, 0.2, 0.2)
+df <- data.frame(x, px)
+df
+
+#Step 1
+evalue <- sum(df$x * df$px)
+evalue
+
+#Step 2
+variance <- sum((df$x - evalue)^2 * df$px)
+variance
+
+#Step 3
+sd <- sqrt(variance)
+sd
+
+#Step 4
+with(df, sum(px[x >= 9]))
+
+#Step 5
+with(df, sum(px[x <= 7]))
+```
+
+25.  Suppose a basketball player has made 188 out of 376 free throws.  If the player makes the next 3 free throws, I will pay you $23.  Otherwise you pay me $4.
+
+* Step 1. Find the expected value of the proposition.  Round your answer to two decimal places. 
+* Step 2. If you played this game 994 times how much would you expect to win or lose? (Losses must be entered as negative.) 
+
+```{r}
+px <- 188/376
+#Step 1
+eV <- round(23*(px^3) - 4*(1-px^3), 2)
+eV
+#Step 2
+eV * 994
+```
+
+26.  Flip a coin 11 times.  If you get 8 tails or less, I will pay you $1.  Otherwise you pay me $7.
+
+* Step 1. Find the expected value of the proposition.  Round your answer to two decimal places. 
+* Step 2. If you played this game 615 times how much would you expect to win or lose? (Losses must be entered as negative.) 
+
+```{r}
+#Step 1
+Pwin <- pbinom(8, size=11, prob=1/2)
+eV <- round(1 * Pwin - 7 * (1-Pwin), 2)
+eV
+
+#Step 2
+eV * 615
+```
+
+27.  If you draw two clubs on two consecutive draws from a standard deck of cards you win $583.  Otherwise you pay me $35.  (Cards drawn without replacement.)
+
+* Step 1. Find the expected value of the proposition.  Round your answer to two decimal places. 
+* Step 2. If you played this game 632 times how much would you expect to win or lose? (Losses must be entered as negative.) 
+
+```{r}
+#Step 1
+Pwin <- 13/52 * 12/51
+eV <- round(Pwin * 583 - (1 - Pwin) * 35, 2)
+eV
+
+#Step 2
+eV * 632
+```
+
+28.  A quality control inspector has drawn a sample of 10 light bulbs from a recent production lot.  If the number of defective bulbs is 2 or less, the lot passes inspection.  Suppose 30% of the bulbs in the lot are defective.  What is the probability that the lot will pass inspection? (Round your answer to 3 decimal places)
+
+```{r}
+#P(X>=2)
+round(pbinom(2, 10, .3), 3)
+
+#double check
+round(dbinom(0, 10, .3) + dbinom(1, 10, .3) + dbinom(2, 10, .3), 3)
+```
+
+29.  A quality control inspector has drawn a sample of 5 light bulbs from a recent production lot.  Suppose that 30%  of the bulbs in the lot are defective.  What is the expected value of the number of defective bulbs in the sample?  Do not round your answer. 
+
+```{r}
+5 * .3
+```
+
+30.  The auto parts department of an automotive dealership sends out a mean of 5.5 special orders daily. What is the probability that, for any day, the number of special orders sent out will be more than 5? (Round your answer to 4 decimal places)
+
+```{r}
+# P(X>5)
+round(ppois(5, 5.5, lower=FALSE), 4)
+```
+
+31.  At the Fidelity Credit Union, a mean of 5.7 customers arrive hourly at the drive-through window.  What is the probability that, in any hour, more than 4 customers will arrive? (Round your answer to 4 decimal places)
+
+```{r}
+# P(X>4)
+round(ppois(4, 5.7, lower=FALSE), 4)
+```
+
+32.  The computer that controls a bank's automatic teller machine crashes a mean of  0.4 times per day. What is the probability that, in any 7-day week, the computer will crash no more than 1 time? (Round your answer to 4 decimal places)
+
+```{r}
+# P(X<=1)
+mu <- 0.4 * 7
+round(ppois(1, mu), 4)
+```
+
+33.  A town recently dismissed 8 employees in order to meet their new budget reductions.  The town had 6 employees over 50 years of age and 19 under 50.  If the dismissed employees were selected at random, what is the probability that more than 1 employee was over 50?  Write your answer as a fraction or a decimal number rounded to three decimal places.
+
+```{r}
+#most verbose
+round((choose(6,2) * choose(19,6) / choose(25,8)) + (choose(6,3) * choose(19,5) / choose(25,8)) + (choose(6,4) * choose(19,4) / choose(25,8)) + (choose(6,5) * choose(19,3) / choose(25,8)) + (choose(6,6) * choose(19,2) / choose(25,8)), 3)
+
+#improved verbosity
+round(dhyper(2, m=6, n=19, 8) + dhyper(3, m=6, n=19, 8) + dhyper(4, m=6, n=19, 8) + dhyper(5, m=6, n=19, 8) + dhyper(6, m=6, n=19, 8), 3)
+
+#simplest code
+round(phyper(1, m=6, n=19, 8, lower.tail=FALSE), 3)
+```
+
+34.  Unknown to a medical researcher, 10 out of  25 patients have a heart problem that will result in death if they receive the test drug.  Eight patients are randomly selected to receive the drug and the rest receive a placebo.  What is the probability that less than 7 patients will die?  Write your answer as a fraction or a decimal number rounded to three decimal places.
+
+```{r}
+#best answer
+round(phyper(6, m=10, n=15, 8), 3)
+
+#double check
+round(dhyper(0, m=10, n=15, 8) + dhyper(1, m=10, n=15, 8) + dhyper(2, m=10, n=15, 8) + dhyper(3, m=10, n=15, 8) + dhyper(4, m=10, n=15, 8) + dhyper(5, m=10, n=15, 8) + dhyper(6, m=10, n=15, 8), 3)
+```

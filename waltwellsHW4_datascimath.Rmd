@@ -1,0 +1,71 @@
+---
+title: "HW4_DataSciMath"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment=NA)
+```
+#### Walt Wells - 08.01-08.07.2016
+
+1. Using matrix operations, describe the solutions for the following family of equations:
+
+```{r}
+# x + 2y - 3z = 5
+# 2x + y - 3z = 13
+# -x + y + 2z= -8
+M <- matrix(c(1,2,-1,2,1,1,-3,-3,2),3,3)
+B <- c(5,13,-8)
+M
+```
+
+* a. Find the inverse of the above 3x3 (non-augmented) matrix.
+* b. Solve for the solution using R.
+* c. Modify the 3x3 matrix such that there exists only one non-zero variable in the solution set.
+
+``` {r}
+# a) find inverse of M
+Inv <- solve(M)
+Inv
+# test 
+M %*% Inv
+# b) find the solution
+x <- Inv %*% B
+x
+
+# c) Modify the 3x3 matrix such that there exists only one non-zero variable in the solution set.
+
+# not sure best way to do programmatically, but if we make one col the solution (or = 1), allows for other cols to be 0. 
+M2 <- matrix(c(1,2,-1,5,13,-8,-3,-3,2),3,3)
+M2
+round(solve(M2) %*% B, 4)
+```
+
+2.  Consider the matrix, q=matrix(c(3,1,4,4,3,3,2,3,2),nrow=3). Let b=c(1,4,5).  Use Cramer's rule and R to determine the solution, x, to qx=b, if one exists.  Show all determinants.
+
+``` {r}
+q=matrix(c(3,1,4,4,3,3,2,3,2),nrow=3)
+b=c(1,4,5)
+
+# Cramer's rule
+c1 <- c(3,1,4)
+c2 <- c(4,3,3)
+c3 <- c(2,3,2)
+
+# calc determinants
+D <- det(q)
+Dx <- det(cbind(b, c2, c3))
+Dy <- det(cbind(c1, b, c3))
+Dz <- det(cbind(c1, c2, b))
+D; Dx; Dy; Dz
+
+#solve
+D1 <- Dx / D
+D2 <- Dy / D
+D3 <- Dz / D
+
+D1; D2; D3
+
+#test
+solve(q) %*% b
+
+```

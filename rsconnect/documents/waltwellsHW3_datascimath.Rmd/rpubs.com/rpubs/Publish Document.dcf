@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/199254/639de157f60142c69a5b2f2ef381b1e5
+bundleId: https://api.rpubs.com/api/v1/document/199254/639de157f60142c69a5b2f2ef381b1e5
+url: http://rpubs.com/waltw/199254
+when: 1469814996.98769

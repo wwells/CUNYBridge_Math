@@ -1,5 +1,5 @@
 ---
-title: "CUNY:  Data Science Math - Final Project"
+title: "CUNY Bridge:  Data Science Math - Final Project"
 output: html_document
 ---
 
@@ -7,22 +7,185 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, comment=NA)
 ```
 
-### Walt Wells, 07.31-08.11.2016
+#### Walt Wells, 07.31-08.11.2016
 
-Data Science Math Bridge-Sample Final
+### Environment Setup, Data Import
+```{r warning=FALSE, message=FALSE}
+if (!require("hflights")) install.packages("hflights")
+if (!require("MASS")) install.packages("MASS")
+data(hflights)
 
-Your Data Science Math final is due by the end of day on Sunday, August 8th. You should post your solutions AND VIDEO to your GitHub account.  You are also expected to make a short presentation during our last meeting (3 minutes).  This project will show off your ability to understand probability, statistics, linear algebra, and R.
+# Let's look at the variables ActualElapsedTime and Distance
+#x <- hflights$ArrDelay
+x <- hflights$ActualElapsedTime
+y <- hflights$Distance
+df <- data.frame(x,y)
+# there are some NAs in elapsed time, let's remove those rows now.  
+df <- df[complete.cases(df),]
+#df <- subset(df, x>0)
 
-Using the hflights package or another large (greater than 100,000 observations and 20 variables) dataset of your choosing, pick two quantitative variables (e.g., Arrival Delay and Departure Delay).  Define one of these variables as the random variable X and the other as the random variable Y.  One of these variables must be skewed to the right (positively)
+# confirm skew for at least one var
+par(mfrow=c(1,2))
+hist(df$x)
+hist(df$y)
+```
 
-<i>Probability.</i>  Calculate as a minimum the below probabilities a through d.  Assume the small letter "x" is estimated as the 3d quartile of the X variable, and the small letter "y" is estimated as the 2d quartile of the Y variable.  Interpret the meaning of all probabilities.  In addition, make a table of counts as shown below.
+### Probability
 
-![](example.png)
+We'll check for a number of requested conditional probabilties of X at x and Y at y given the values of x and y.   To do this, we'll subset our df for type of condition, then calcluate based on remaining observations of X or Y. 
+
+```{r}
+quantile(df$x)
+quantile(df$y)
+yQ2 <- quantile(df$y, .5) #809
+xQ3 <- quantile(df$x, .75) #165
+all <- length(df$x)
+
+# Let's check manually, review whether independant or dependant
+# x = 3rd quartile, y = 2nd quartile
+# a) P(X > x | Y > y), should be (.25 * .50) / (.25)
+gy <- df[df$y > yQ2,]
+pgy <- round(nrow(gy) / all, 3)
+
+xgyg <- gy[gy$x > xQ3,]
+pgxy <- round(nrow(xgyg) / all, 3)
+pxgyg <- round(pgxy / pgy, 3)
+pxgyg
+
+# test a independant?  
+gx <- df[df$x > xQ3, ]
+pgx <- round(nrow(gx) / all, 3)
+(pgx * pgy) / pgy
+
+# b) P(X > x, Y > y)
+pxy <- round(pgx * pgy, 3)
+pxy
+
+
+# c) P(X < x | Y > y) 
+xlyg <- gy[gy$x <= xQ3, ]
+plxgy <- round(nrow(xlyg) / all, 3)
+pxlyg <- round(plxgy / pgy, 3)
+pxlyg
+
+# d) find x | y for all table values
+# have a * c, need vals for Y <= y
+ly <- df[df$y <= yQ2,]
+ply <- round(nrow(ly) / all, 3)
+
+xlyl <- ly[ly$x <= xQ3,]
+plxgly <- round(nrow(xlyl) / all, 3)
+pxlyl <- round(plxgly / ply, 3)
+pxlyl
+
+xgyl <- ly[ly$x > xQ3,]
+pgxgly <- round(nrow(xgyl) / all, 3)
+pxgyl <- round(pgxgly / ply, 3)
+pxgyl
+
+cname <- c("<=2d quartile", ">2d quartile", "Total")
+rname <- c("<=3d quartile", ">3d quartile")
+c1 <- c(nrow(xlyl), nrow(xgyl))
+c2 <- c(nrow(xlyg), nrow(xgyg))
+
+result <- data.frame(c1, c2, row.names = rname)
+result[ ,3] <- rowSums(result)
+result["Total", ] <- colSums(result)
+colnames(result) <- cname
+result
+
+```
  
 Does splitting the data in this fashion make them independent? Let A be the new variable counting those observations above the 3d quartile for X, and let B be the new variable counting those observations for the 2d quartile for Y.    Does P(A|B)=P(A)P(B)?   Check mathematically, and then evaluate by running a Chi Square test for association.
 
-<i>Descriptive and Inferential Statistics.</i> Provide univariate descriptive statistics and appropriate plots.  Provide a scatterplot of the two variables.  Provide a 95% CI for the difference in the mean of the variables.  Derive a correlation matrix for two of the quantitative variables you selected.  Test the hypothesis that the correlation between these variables is 0 and provide a 99% confidence interval.  Discuss the meaning of your analysis.
+```{r}
+A <- df[df$x > xQ3, ]
+PA <- round(length(A$x)/all, 3)
+B <- df[df$y > yQ2, ] 
+PB <- round(length(B$y)/all, 3)
+AgB <- B[B$x > xQ3, ]
+PAgB <- round(length(AgB$x)/all, 3)
+PAgB
+round(PA * PB, 3)
 
-<i>Linear Algebra and Correlation.</i>  Invert your correlation matrix. (This is known as the precision matrix and contains variance inflation factors on the diagonal.) Multiply the correlation matrix by the precision matrix, and then multiply the precision matrix by the correlation matrix. As an advanced option, conduct principle components analysis and interpret.  Discuss.
+#now let's setup our result df for a chisq test
+adjresults <- result[1:2,]
+adjresults <- adjresults[, 1:2]
 
-<i>Calculus-Based Probability & Statistics.</i>  Many times, it makes sense to fit a closed form distribution to data.  For your variable that is skewed to the right, shift it so that the minimum value is above zero.  Then load the MASS package and run fitdistr to fit an exponential probability density function.  (See  https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/fitdistr.html ).  Find the optimal value of l for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000, l)).  Plot a histogram and compare it with a histogram of your original variable.   Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF).   Also generate a 95% confidence interval from the empirical data, assuming normality.  Finally, provide the empirical 5th percentile and 95th percentile of the data.  Discuss.
+chisq.test(adjresults)
+
+# double check with the full df
+chisq.test(df)
+
+```
+
+Since the p value is so low, we do not reject the null hypothesis.   All signs suggest that when these two variables are split along different quartiles and compared, they are independant.   The double check using the full df suggests the same result, regardless of how the data is split. 
+
+### Descriptive and Inferential Statistics.
+
+```{r}
+#Provide univariate descriptive statistics and appropriate plots. 
+summary(df)
+plot(density(df$x))
+plot(density(df$y))
+
+#Provide a scatterplot of the two variables.  
+plot(df$x, df$y)
+
+#Provide a 95% CI for the difference in the mean of the variables.  
+t.test(df$y, df$x)
+
+#Derive a correlation matrix for two of the quantitative variables you selected.  
+CorMatrix <- cor(df)
+CorMatrix
+
+#Test the hypothesis that the correlation between these variables is 0 and provide a 99% confidence interval.  Discuss the meaning of your analysis.
+cor.test(df$x, df$y, conf.level=0.99)
+```
+
+Our correlation tests show that these two variables are highly correlated.  My understanding of modeling is still in its infancy, but I believe if we were trying to model using these two variables, it would be difficult to use both because of the overly high degree of correlation.  We may need to make some decisions to not include one or the other, or create a combined statistic.  
+
+### Linear Algebra and Correlation.
+
+```{r}
+#Invert your correlation matrix. (This is known as the precision matrix and contains variance inflation factors on the diagonal.) 
+InvMatrix <- solve(CorMatrix)
+InvMatrix
+
+#Multiply the correlation matrix by the precision matrix, and then multiply the precision matrix by the correlation matrix. 
+CorMatrix %*% InvMatrix
+
+InvMatrix %*% CorMatrix
+#As an advanced option, conduct principle components analysis and interpret.  Discuss.
+
+prcomp(df, center=TRUE, scale.=TRUE)
+```
+
+Stackoverflow led me to this solution for finding a principle components analysis in R using the stats package, but my understanding of PCA does not yet extend far enough to discuss or interpret these results.  I'll look forward to having a truer understanding at the end of the second semester of the program.  
+
+### Calculus-Based Probability & Statistics.
+
+```{r}  
+#For your variable that is skewed to the right, shift it so that the minimum value is above zero.  Then load the MASS package and run fitdistr to fit an exponential probability density function.    
+distr <- fitdistr(df$x, densfun="exponential")
+
+#Find the optimal value of l for this distribution, and then take 1000 samples from this exponential distribution using this value (e.g., rexp(1000, l)).  
+l <- distr$estimate
+xsamp <- rexp(1000,l)
+
+#Plot a histogram and compare it with a histogram of your original variable.  
+par(mfrow=c(1,2))
+hist(xsamp)
+hist(df$x)
+
+#Using the exponential pdf, find the 5th and 95th percentiles using the cumulative distribution function (CDF).   Also generate a 95% confidence interval from the empirical data, assuming normality.  
+qexp(0.95, l); qexp(0.05, l)
+
+qnorm(0.95, mean(df$x), sd(df$x)); qnorm(0.5, mean(df$x), sd(df$x))
+
+#Finally, provide the empirical 5th percentile and 95th percentile of the data.  Discuss.
+
+quantile(df$x, .95); quantile(df$x, .05)
+```
+
+These exercises show what happens when we normalize our x variable skew and how it changes the confidence intervals vs the original dataset.   We can see similarities in each, but only the right tail remains reasonably consistent across comparisons, accounting for skew correction.   Since, in this analysis, our 'X' is considering total elapsed time, and so few flights were up in the air for < 60 min, our .05 estimates look fairly different.  

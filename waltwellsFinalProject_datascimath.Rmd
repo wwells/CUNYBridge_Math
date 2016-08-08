@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, comment=NA)
 ```{r warning=FALSE, message=FALSE}
 if (!require("hflights")) install.packages("hflights")
 if (!require("MASS")) install.packages("MASS")
+
 data(hflights)
 
 # Let's look at the variables ActualElapsedTime and Distance
@@ -158,10 +159,12 @@ CorMatrix %*% InvMatrix
 InvMatrix %*% CorMatrix
 #As an advanced option, conduct principle components analysis and interpret.  Discuss.
 
-prcomp(df, center=TRUE, scale.=TRUE)
+PCA <- prcomp(df, center=TRUE, scale.=TRUE)
+PCA
+plot(PCA$x[,1], PCA$x[,2])
 ```
 
-Stackoverflow led me to this solution for finding a principle components analysis in R using the stats package, but my understanding of PCA does not yet extend far enough to discuss or interpret these results.  I'll look forward to having a truer understanding at the end of the second semester of the program.  
+Since there are only two variables in our dataset, we can see the relationship between the two fairly well through many of the other previously utilized techniques.   While it's interesting to see the results of a PCA showing cumulative and proportional variance, reducing dimensionality to better understand relationships may be uncessary here. The resulting scatter plot looks strikingly similar to our simple x,y plot.  
 
 ### Calculus-Based Probability & Statistics.
 
